@@ -303,6 +303,10 @@ Setting up the environment:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
 ```
     This defines a job named build-and-push that will run on an ubuntu-latest runner.
 
@@ -348,8 +352,8 @@ Update Helm chart image tag:
     - name: Update Helm Chart Image Tag
       run: |
         CHART_PATH="path/to/helm/chart/values.yaml"
-        sed -i "s|image:.*|image: $IMAGE|" $CHART_PATH
-
+        sed -i "s|tag:.*|tag: $IMAGE_TAG|" $CHART_PATH
+         git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
         git add $CHART_PATH
