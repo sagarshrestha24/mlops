@@ -494,5 +494,65 @@ Here is the alerting rules
           annotations:
             description: '{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes.'
             summary: 'Model {{ $labels.instance }} down'
+```
 
+This alert detects pods in a Kubernetes cluster that are repeatedly crashing and restarting within a short timeframe. Such behavior is often referred to as a "CrashLoopBackOff."
+Rule Breakdown:
 
+```
+- alert: KubernetesPodCrashLooping
+  expr: increase(kube_pod_container_status_restarts_total[5m]) > 3
+  for: 2m
+  labels:
+    severity: warning
+  annotations:
+     summary: Kubernetes pod crash looping (instance {{ $labels.instance }})
+     description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is crash looping\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+```
+Alert Name: **KubernetesPodCrashLooping**
+
+This is the unique identifier for the alert, used in notifications and dashboards.
+
+**Expression:**
+```
+increase(kube_pod_container_status_restarts_total[5m]) > 3 
+```
+- kube_pod_container_status_restarts_total: A metric that counts the number of times a container has restarted.
+- increase(...[5m]): Measures how much this metric has increased over the past 5 minutes.
+- (> 3): The alert triggers if the restart count increases by more than 3 within 5 minutes.
+
+**For Clause:**
+
+```for: 2m```
+
+The condition must persist for 2 minutes before the alert is triggered. This prevents alerts from firing due to transient issues.
+
+**Labels:**
+
+```
+labels:
+  severity: warning
+```
+The alert is labeled with a severity level of warning, indicating that it requires attention but is not critical.
+
+Annotations:
+
+**Summary:**
+
+```
+Kubernetes pod crash looping (instance {{ $labels.instance }})
+```
+
+A short description of the issue, including the affected instance.
+
+**Description:**
+
+```
+Pod {{ $labels.namespace }}/{{ $labels.pod }} is crash looping\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}
+```
+
+A detailed message with:
+
+- Namespace and pod information ({{ $labels.namespace }}/{{ $labels.pod }}).
+- The value of the metric when the alert was triggered ({{ $value }}).
+- The labels associated with the metric ({{ $labels }}).
