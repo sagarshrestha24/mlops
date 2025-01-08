@@ -42,11 +42,12 @@ jobs:
       # Update the Helm chart with the new image tag
       - name: Update Helm Chart Image Tag
         run: |
+          IMAGE_TAG=$(git rev-parse --short=5 HEAD)
           # Update the image tag in the Helm chart
           sed -i "s/tag:.*/tag: $IMAGE_TAG/g" charts/mlops-chart/values.yaml
           git config user.name "sagarshrestha24"
           git config user.email "kobesagar24@gmail.com"
           git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
           git add .
-          git commit -m "Update Helm chart image tag to $IMAGE"
+          git commit -m "Update Helm chart image tag to $IMAGE_TAG"
           git push origin main
