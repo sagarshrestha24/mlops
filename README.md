@@ -465,8 +465,34 @@ spec:
 Apply the application file 
 
 ``` kubectl apply -f mlops-app.yaml ```
-        
 
 **Argocd Dashboard** 
 ![image](https://github.com/user-attachments/assets/3e5f4d5b-0bad-4c03-aa0d-99f08ed38fd4)
+
+**11. Alerting**
+
+Here is the alerting rules
+
+```
+  alerting_rules.yml: 
+    groups:
+    - name: Alerts
+      rules:
+        - alert: KubernetesPodCrashLooping
+          expr: increase(kube_pod_container_status_restarts_total[5m]) > 3
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+             summary: Kubernetes pod crash looping (instance {{ $labels.instance }})
+             description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is crash looping\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+        - alert: ModelDown
+          expr: up{job="flask-app"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            description: '{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes.'
+            summary: 'Model {{ $labels.instance }} down'
+
 
