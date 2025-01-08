@@ -2,3 +2,4 @@ flask
 transformers
 gliner
 torch
+prometheus_flask_exporter
