@@ -259,6 +259,11 @@ helm install loki-stack loki-stack
 
 **Grafana**: For customizable dashboards and data visualization.
 
+Dashboard:
+
+![image](https://github.com/user-attachments/assets/b20a09c9-9622-4938-85cd-effa5549a4f4)
+
+
 **Loki**: For centralized logging.
 
 Verify the Monitoring Deployment:
@@ -420,6 +425,10 @@ spec:
       - CreateNamespace=true
       - ServerSideApply=true
 ```
+
+**Argocd Dashboard** 
+![image](https://github.com/user-attachments/assets/3e5f4d5b-0bad-4c03-aa0d-99f08ed38fd4)
+
 Apply the application file 
 
 ``` kubectl apply -f mlops-app.yaml ```
