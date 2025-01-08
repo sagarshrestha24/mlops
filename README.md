@@ -259,12 +259,14 @@ helm install loki-stack loki-stack
 
 **Grafana**: For customizable dashboards and data visualization.
 
-Dashboard:
-
+**Dashboard:**
 ![image](https://github.com/user-attachments/assets/b20a09c9-9622-4938-85cd-effa5549a4f4)
 
-
 **Loki**: For centralized logging.
+
+Verfifying the logs of gliner from grafana loki
+![image](https://github.com/user-attachments/assets/59c376a2-0379-43f1-8b5d-afac6cd10fb1)
+
 
 Verify the Monitoring Deployment:
 ```
@@ -284,6 +286,39 @@ scrape_configs:
 Restart Prometheus to apply the configuration.
 
 Access the services using the appropriate IP addresses or port-forwarding.
+
+**Add Data Sources via the Grafana UI**
+
+**For Prometheus:**
+
+    1. Access Grafana: Open your Grafana dashboard in a web browser.
+
+    2. Navigate to Data Sources:
+        - Go to the Grafana sidebar.
+        - Click on Configuration (gear icon) → Data Sources.
+
+    3. Add a New Data Source:
+        - Click on the Add data source button.
+        - Select Prometheus from the list of available data source types.
+
+    4. Configure Prometheus Data Source:
+        - In the URL field, provide the Prometheus server URL (e.g., http://<prometheus-server-ip>:9090).
+        - Configure any additional settings like timeouts, scrape interval, and authentication if necessary.
+        - Click Save & Test to verify the connection.
+
+**For Loki:**
+
+    1. Navigate to Data Sources:
+        - Follow the same steps as above to access the data sources page.
+
+    2. Add a New Data Source:
+        - Click on the Add data source button.
+        - Select Loki from the list of available data source types.
+
+    3. Configure Loki Data Source:
+        - In the URL field, provide the Loki server URL (e.g., http://<loki-server-ip>:3100).
+        - Configure any additional settings like max active streams, or authentication.
+        - Click Save & Test to verify the connection.
 
 
 **9. Continuous Integration (CI) using GitHub Actions**
@@ -426,10 +461,12 @@ spec:
       - ServerSideApply=true
 ```
 
-**Argocd Dashboard** 
-![image](https://github.com/user-attachments/assets/3e5f4d5b-0bad-4c03-aa0d-99f08ed38fd4)
 
 Apply the application file 
 
 ``` kubectl apply -f mlops-app.yaml ```
         
+
+**Argocd Dashboard** 
+![image](https://github.com/user-attachments/assets/3e5f4d5b-0bad-4c03-aa0d-99f08ed38fd4)
+
