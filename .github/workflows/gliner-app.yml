@@ -44,9 +44,9 @@ jobs:
           # Update the image tag in the Helm chart
           sed -i "s|tag:.*|tag: $IMAGE_TAG|" $CHART_PATH
 
-          # Commit the change
           git config user.name "sagarshrestha24"
           git config user.email "kobesagar24@gmail.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
           git add $CHART_PATH
           git commit -m "Update Helm chart image tag to $IMAGE"
           git push origin main
