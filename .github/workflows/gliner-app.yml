@@ -24,7 +24,7 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      Build and push the Docker image
+      # Build and push the Docker image
       - name: Build and Push Docker Image
         run: |
           IMAGE_TAG=$(git rev-parse --short=5 HEAD)
