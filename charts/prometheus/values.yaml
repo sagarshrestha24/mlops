@@ -797,7 +797,7 @@ serverFiles:
     scrape_configs:
       - job_name: 'flask-app'
         static_configs:
-        - targets: ['mlops-mlops-chart.defalut:5000']
+        - targets: ['mlops-mlops-chart.default:5000']
       - job_name: prometheus
         static_configs:
           - targets:
