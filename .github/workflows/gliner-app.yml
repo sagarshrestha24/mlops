@@ -8,7 +8,10 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
     steps:
       # Checkout the repository
       - name: Checkout repository
@@ -22,19 +25,19 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       # Build and push the Docker image
-      - name: Build and Push Docker Image
-        run: |
-          IMAGE_TAG=$(git rev-parse --short=5 HEAD)
-          IMAGE=${{ secrets.REGISTRY_USERNAME }}/${{ secrets.IMAGE_NAME }}:$IMAGE_TAG
+      # - name: Build and Push Docker Image
+      #   run: |
+      #     IMAGE_TAG=$(git rev-parse --short=5 HEAD)
+      #     IMAGE=${{ secrets.REGISTRY_USERNAME }}/${{ secrets.IMAGE_NAME }}:$IMAGE_TAG
 
-          # Build the Docker image
-          docker build -t $IMAGE .
+      #     # Build the Docker image
+      #     docker build -t $IMAGE .
 
-          # Push the Docker image
-          docker push $IMAGE
+      #     # Push the Docker image
+      #     docker push $IMAGE
 
-          # Output the image tag for later steps
-          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+      #     # Output the image tag for later steps
+      #     echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
       # Update the Helm chart with the new image tag
       - name: Update Helm Chart Image Tag
