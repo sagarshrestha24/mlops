@@ -267,6 +267,17 @@ kubectl get pods
 kubectl get services
 ```
 
+Integration with Prometheus
+
+To scrape the metrics, configure Prometheus to monitor your Flask app by adding the following job to prometheus.yml:
+```
+scrape_configs:
+  - job_name: 'flask-app'
+    static_configs:
+      - targets: ['<FLASK_APP_IP>:5000']
+```
+Restart Prometheus to apply the configuration.
+
 Access the services using the appropriate IP addresses or port-forwarding.
 
 
