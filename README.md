@@ -11,7 +11,7 @@ The pipeline includes a Flask-based web application to serve the model, with mon
 Model used: **urchade/gliner_medium-v2.1**
 
 ## Directory Structure
-
+```
 project/
 ├── app.py
 ├── model_pipeline.py
@@ -19,6 +19,7 @@ project/
 │   └── index.html
 ├── requirements.txt
 └── README.md
+```
 
 ## File Descriptions
 **1. app.py**
@@ -132,5 +133,35 @@ Lists all the dependencies required to run the application.
 **torch**: PyTorch backend.
 
 **prometheus_flask_exporter**: Integration for Prometheus monitoring.
+
+
+## Setup Instructions
+
+**1. Clone the Repository**
+
+```
+git clone <repository-url>
+cd <repository-directory>
+```
+
+**2. Install Dependencies**
+
+Ensure Python 3.7+ is installed. Run:
+
+```pip install -r requirements.txt```
+
+**3. Run the Application**
+
+Start the Flask server:
+
+```python3 app.py```
+
+The application will be available at http://127.0.0.1:5000.
+
+**4. Access the Web Interface**
+Open a browser and navigate to the URL to input text and labels for entity extraction.
+
+**5. Monitor Metrics**
+Prometheus metrics can be scraped from the /metrics endpoint for tracking prediction errors and other performance statistics.
 
 
