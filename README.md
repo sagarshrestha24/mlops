@@ -12,13 +12,19 @@ Model used: **urchade/gliner_medium-v2.1**
 
 ## Directory Structure
 ```
-project/
+mlops/
 ├── app.py
 ├── model_pipeline.py
 ├── templates/
 │   └── index.html
 ├── requirements.txt
-└── README.md
+├── Dockerfile
+├── charts/
+│   └── mlops-chart/
+|   ├── grafana/
+│   └── prometheus/
+|   └── loki-stack/
+├── README.md
 ```
 
 ## File Descriptions
@@ -134,6 +140,26 @@ Lists all the dependencies required to run the application.
 
 **prometheus_flask_exporter**: Integration for Prometheus monitoring.
 
+**5. Dockerfile**
+
+Defines the containerization process for the application.
+
+Contents:
+```
+FROM python:3.8-slim
+
+WORKDIR /app
+COPY . /app
+RUN pip install --upgrade pip
+RUN pip install  -r requirements.txt
+
+EXPOSE 5000
+CMD ["python", "app.py"]
+```
+
+**6. charts/mlops-chart**
+
+Contains the Helm chart for deploying the containerized application to a Kubernetes cluster.
 
 ## Setup Instructions
 
@@ -159,9 +185,227 @@ Start the Flask server:
 The application will be available at http://127.0.0.1:5000.
 
 **4. Access the Web Interface**
+
 Open a browser and navigate to the URL to input text and labels for entity extraction.
 
 **5. Monitor Metrics**
+
 Prometheus metrics can be scraped from the /metrics endpoint for tracking prediction errors and other performance statistics.
 
+**6. Containerization**
 
+Build and run the Docker container for the application.
+
+Build the Docker Image
+
+```docker build -t gliner-ner-app . ```
+
+Run the Docker Container
+
+```docker run -d -p 5000:5000 gliner-ner-app```
+
+The application will now be accessible at http://127.0.0.1:5000.
+
+**7. Model Deployment on Kubernetes**
+
+**Prerequisites:**
+A running Kubernetes cluster.
+
+Helm installed on your local machine.
+
+Steps to Deploy:
+
+Navigate to the Helm chart directory:
+
+```cd charts/mlops-chart```
+
+Install the Helm chart:
+
+```helm install gliner-ner ./```
+
+Verify the Deployment:
+```
+kubectl get pods
+kubectl get services
+```
+To access the application from web browser
+
+```
+kubectl port-forward svc/svc-name 5000:5000
+```
+The application will now be accessible at http://127.0.0.1:5000.
+
+**8. Monitoring & Logging**
+
+Deploy the monitoring and logging stack using the provided Helm chart.
+
+Steps to Deploy:
+
+Navigate to the monitoring  directory:
+
+```cd charts/```
+
+Install the Helm chart:
+
+```
+helm install prometheus prometheus
+helm install grafana grafana
+helm install loki-stack loki-stack
+```
+
+**Access Monitoring Tools:**
+
+**Prometheus**: To scrape and visualize metrics.
+
+**Grafana**: For customizable dashboards and data visualization.
+
+**Loki**: For centralized logging.
+
+Verify the Monitoring Deployment:
+```
+kubectl get pods
+kubectl get services
+```
+
+Access the services using the appropriate IP addresses or port-forwarding.
+
+
+**9. Continuous Integration (CI) using GitHub Actions**
+
+The CI pipeline you've configured in GitHub Actions automates the process of building and pushing Docker images, as well as updating your Helm chart with the new image tag. Below is a breakdown of each step:
+
+Triggering the workflow:
+
+```
+on:
+  push:
+    branches:
+      - main  # Run on pushes to the main branch
+  workflow_dispatch:  # Allow manual triggering
+```
+
+This specifies that the workflow will trigger whenever a push is made to the main branch or when it is manually triggered (via GitHub UI).
+
+Setting up the environment:
+
+```
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+```
+    This defines a job named build-and-push that will run on an ubuntu-latest runner.
+
+Checkout the repository:
+
+```
+- name: Checkout repository
+  uses: actions/checkout@v3
+```
+
+This step checks out the code from the repository to make it available for subsequent steps.
+
+Login to Docker Registry:
+
+```
+- name: Log in to Docker Registry
+  uses: docker/login-action@v2
+  with:
+    username: ${{ secrets.REGISTRY_USERNAME }}
+    password: ${{ secrets.REGISTRY_PASSWORD }}
+```
+
+This step logs into the Docker registry using the credentials stored in GitHub Secrets (REGISTRY_USERNAME and REGISTRY_PASSWORD).
+
+Build and push the Docker image:
+
+```
+- name: Build and Push Docker Image
+  run: |
+    IMAGE_TAG=$(git rev-parse --short=5 HEAD)
+    IMAGE=${{ secrets.REGISTRY_USERNAME }}/${{ secrets.IMAGE_NAME }}:$IMAGE_TAG
+
+    docker build -t $IMAGE .
+    docker push $IMAGE
+
+    echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+```
+
+
+Update Helm chart image tag:
+
+```
+    - name: Update Helm Chart Image Tag
+      run: |
+        CHART_PATH="path/to/helm/chart/values.yaml"
+        sed -i "s|image:.*|image: $IMAGE|" $CHART_PATH
+
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add $CHART_PATH
+        git commit -m "Update Helm chart image tag to $IMAGE"
+        git push origin main
+```
+
+This step updates the values.yaml file of the Helm chart with the new image tag. It uses sed to replace the old image tag with the new one ($IMAGE).The change is then committed and pushed back to the main branch.
+
+**10. Continuous Deployment (CD) using ArgoCD**
+
+ArgoCD is a declarative, GitOps continuous delivery tool for Kubernetes. The idea behind GitOps is that the desired state of the infrastructure is stored in Git, and ArgoCD ensures that the live environment is aligned with this state.
+
+**ArgoCD Configuration:**      
+
+ArgoCD works by connecting to a Kubernetes cluster and monitoring a Git repository for changes. When a change (e.g., a Helm chart update or a manifest file) is detected in the repository, it automatically triggers the deployment of the application.
+
+
+**Steps to Install ArgoCD via Helm:**
+
+**Add the ArgoCD Helm Chart Repository:** First, add the ArgoCD Helm chart repository to your Helm configuration.
+
+```
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+```
+**Create a Namespace for ArgoCD (optional but recommended):** It's a good practice to install ArgoCD in its own namespace. You can create a namespace called argocd:
+
+``` kubectl create namespace argocd ```
+
+**Install ArgoCD using Helm:** Now, you can install ArgoCD into the Kubernetes cluster using the Helm chart.
+
+``` helm install argocd argo/argo-cd --namespace argocd ```
+
+This command will install ArgoCD in the argocd namespace. It will use the latest stable version of the chart.
+
+
+**Creating an Application file for ArgoCD:**
+
+ArgoCD uses an application file to describe the desired state of the application, including its source (Git repository), target cluster, and path to the Helm charts or manifests.
+An example of an application file:
+```
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mlops
+  namespace: argocd
+spec:
+  destination:
+    name: ''
+    namespace: default
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: charts/mlops-chart
+    repoURL: 'https://github.com/sagarshrestha24/mlops.git'
+    targetRevision: HEAD
+  sources: []
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+```
+Apply the application file 
+
+``` kubectl apply -f mlops-app.yaml ```
+        
