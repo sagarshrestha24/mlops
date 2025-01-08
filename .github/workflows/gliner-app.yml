@@ -39,14 +39,14 @@ jobs:
       # Update the Helm chart with the new image tag
       - name: Update Helm Chart Image Tag
         run: |
-          CHART_PATH="path/to/helm/chart/values.yaml"  # Replace with your Helm chart's values.yaml path
+          CHART_PATH="charts/mlops-chart/values.yaml"  # Replace with your Helm chart's values.yaml path
 
           # Update the image tag in the Helm chart
-          sed -i "s|image:.*|image: $IMAGE|" $CHART_PATH
+          sed -i "s|tag:.*|tag: $IMAGE_TAG|" $CHART_PATH
 
           # Commit the change
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+          git config user.name "sagarshrestha24"
+          git config user.email "kobesagar24@gmail.com"
           git add $CHART_PATH
           git commit -m "Update Helm chart image tag to $IMAGE"
           git push origin main
