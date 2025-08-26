@@ -2,11 +2,9 @@ name: Ci/CD for Gliner App
 on:
   push:
     branches:
-      - main  # Run on pushes to the main branch
-  workflow_dispatch:  # Allow manual triggering
-
+      - main  
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
     permissions:
       # Give the default GITHUB_TOKEN write permission to commit and push the
@@ -39,15 +37,25 @@ jobs:
           # # Output the image tag for later steps
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
-      # Update the Helm chart with the new image tag
-      - name: Update Helm Chart Image Tag
-        run: |
-          IMAGE_TAG=$(git rev-parse --short=5 HEAD)
-          # Update the image tag in the Helm chart
-          sed -i "s/tag:.*/tag: $IMAGE_TAG/g" charts/mlops-chart/values.yaml
-          git config user.name "sagarshrestha24"
-          git config user.email "kobesagar24@gmail.com"
-          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
-          git add .
-          git commit -m "Update Helm chart image tag to $IMAGE_TAG"
-          git push origin main
+  deploy:
+    runs-on: ubuntu-latest
+    environment: 
+      name: test
+    needs: 
+      - build
+    steps:
+      - name: Branch Tag Action
+        uses: nimblehq/branch-tag-action@v1.2
+
+      - name: Notify infra repo
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: "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"
+          repository: sagarshrestha24/argo-cd
+          event-type: image-published
+          client-payload: |
+            {
+              "service": "mbmstudio",
+              "tag": "$IMAGE_TAG",
+              "env": "test"
+            }
