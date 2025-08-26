@@ -28,15 +28,6 @@ jobs:
           IMAGE_TAG=$(git rev-parse --short=5 HEAD)
           IMAGE=${{ secrets.REGISTRY_USERNAME }}/${{ secrets.IMAGE_NAME }}:$IMAGE_TAG
 
-          # Build the Docker image
-          docker build -t $IMAGE .
-
-          # # Push the Docker image
-          docker push $IMAGE
-
-          # # Output the image tag for later steps
-          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
-
   deploy:
     runs-on: ubuntu-latest
     environment: 
@@ -50,7 +41,7 @@ jobs:
       - name: Notify infra repo
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: "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"
+          token: "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"
           repository: sagarshrestha24/argo-cd
           event-type: image-published
           client-payload: |
