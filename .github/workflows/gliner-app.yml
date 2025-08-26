@@ -41,7 +41,7 @@ jobs:
       - name: Notify infra repo
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: "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"
+          token: "${{ secrets.GH_TOKEN }}"
           repository: sagarshrestha24/argo-cd
           event-type: image-published
           client-payload: |
